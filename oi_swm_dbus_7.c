@@ -58,7 +58,7 @@ void print_json_tree(struct json_object *jobj, int depth)
     }
 }
 
-void setTreeEntry ()
+void setTreeEntry()
 {
 	// printf ("Level: %d\n", level);
 	// printf ("Key: %s\n", tempString);
@@ -98,6 +98,8 @@ void setTreeEntry ()
 			gtk_tree_store_set(treeStore, &iterChild5, 0, tempString, -1);
 			gtk_tree_store_set(treeStore, &iterChild5, 1, valueString, -1);
 			}
+			
+		return;
 }
 
 
@@ -184,22 +186,30 @@ void on_button_clicked(GtkButton *button, gpointer user_data)
     }
 
     GError *error = NULL;
+    gchar *response;
+    gchar *packageName = "/emulators/fs-uae";
+    
     GVariant *result = g_dbus_proxy_call_sync(proxy,
                                               method,
-                                              NULL,
+                                              g_variant_new("(s)", packageName),
                                               G_DBUS_CALL_FLAGS_NONE,
                                               -1,
                                               NULL,
                                               &error);
 
-    if (result == NULL) 
+    if (error) 
     {
-        g_printerr("Error calling method on D-Bus proxy: %s\n", error->message);
+        g_printerr("Error calling method: %s\n", error->message);
         g_error_free(error);
-        return;
-    }
+    } else
+    {
+		g_variant_get(result, "(s)", &response);
+		g_print("Response: %s\n", response);
+		g_free(response);
+		g_variant_unref(result);
+	}
 
-    g_variant_unref(result);
+    
 }
 
 static void on_activate(GtkApplication* app) 
@@ -213,7 +223,7 @@ static void on_activate(GtkApplication* app)
     GtkWidget *install_button = GTK_WIDGET(gtk_builder_get_object(builder, "button1"));
     GtkWidget *uninstall_button = GTK_WIDGET(gtk_builder_get_object(builder, "button2"));
     GtkWidget *update_button = GTK_WIDGET(gtk_builder_get_object(builder, "button3"));
-    GtkImage *logo = GTK_WIDGET(gtk_builder_get_object(builder, "image"));
+    GtkImage *logo = GTK_IMAGE(gtk_builder_get_object(builder, "image"));
 
 	treeStore	= GTK_TREE_STORE(gtk_builder_get_object(builder, "treeStore"));
 	pCol		= GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "pCol"));
@@ -231,15 +241,15 @@ static void on_activate(GtkApplication* app)
     // Load the logo and resize it to 48x48 pixels
     pixbuf = gdk_pixbuf_new_from_file("oi_logo_small.png", NULL);
     scaled_pixbuf = gdk_pixbuf_scale_simple(pixbuf, 48, 48, GDK_INTERP_BILINEAR);
-    logo = gtk_image_new_from_pixbuf(scaled_pixbuf);
+    //logo = GTK_IMAGE(gtk_image_new_from_pixbuf(scaled_pixbuf));
     gtk_image_set_from_pixbuf(logo, scaled_pixbuf);
     g_object_unref(pixbuf); // Clean up the original pixbuf
 
-	FILE *file = fopen("catalog.base.json", "r");
+	FILE *file = fopen("/var/pkg/state/known/catalog.base.C", "r");
     if (file == NULL) 
     {
         perror("Error opening file");
-        return 1;
+        return;
     }
 
     struct json_object *parsed_json;
@@ -249,7 +259,7 @@ static void on_activate(GtkApplication* app)
     if (parsed_json == NULL) 
     {
         printf("Error parsing JSON file\n");
-        return 1;
+        return;
     }
 
     // Initialize DBus connection
@@ -266,7 +276,7 @@ static void on_activate(GtkApplication* app)
     proxy = g_dbus_proxy_new_sync(conn,
                                   G_DBUS_PROXY_FLAGS_NONE,
                                   NULL,
-                                  "swm.openindiana.org",  // The name of the interface
+                                  "org.openindiana.swm",  // The name of the interface
                                   "/org/openindiana/SoftwareManager", // The object path
                                   "org.openindiana.swm",  // The interface name
                                   NULL,
@@ -296,10 +306,10 @@ void on_destroy()
 
 int main(int argc, char **argv) 
 {
-    GtkApplication *app = gtk_application_new("swm.openindiana.org", G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app = gtk_application_new("swm.openindiana.org", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
-    return status;
+    return 0;
 }
 
