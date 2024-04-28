@@ -12,7 +12,7 @@ Areas that still need investigation:
 Update:
 
 I added a minimal python/dbus service that shall service as proxy to api.py which can interact with the pkg manager of OpenIndiana and Solaris.
-Currently it retrieves the method and packageName and would then have to interact with the pkg manager (still missing as I have no python experiene).
+Currently it retrieves the method and packageName and would then have to interact with the pkg manager (still missing as I have no python experience).
 
 Remmeber to start the service first and then the app.
 
