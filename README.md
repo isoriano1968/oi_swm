@@ -20,6 +20,9 @@ You can track the dbus messages via "dbus-monitor --session" the service and app
 
 Wann help? Sure feel free to contribute and get in touch or join our OI working sessions every Sunday 17:00h CEST on https://meet.chaostreffbern.ch/OpenIndianaCoWorkingSessions
 
+![Screenshot at 2024-04-28 06-23-15](https://github.com/isoriano1968/oi_swm/assets/81116077/837b95ea-2388-46b8-9d6c-b46e40efb56a)
+
+
 Cheers
 
 Iggi
